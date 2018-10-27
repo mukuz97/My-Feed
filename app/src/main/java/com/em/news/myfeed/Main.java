@@ -2,6 +2,7 @@ package com.em.news.myfeed;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +25,7 @@ public class Main extends AppCompatActivity {
     RecyclerView recyclerView;
     RecyclerAdapter recyclerAdapter;
     DBAdapter dbAdapter;
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +44,15 @@ public class Main extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(recyclerAdapter);
 
+        swipeRefreshLayout = findViewById(R.id.content_refresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new FetchFeed().execute();
+            }
+        });
         new FetchFeed().execute();
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     private class FetchFeed extends AsyncTask<Void, Void, Boolean>{
@@ -144,6 +154,7 @@ public class Main extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             recyclerAdapter.notifyDataSetChanged();
             recyclerView.smoothScrollToPosition(dbAdapter.getSize()-1);
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
